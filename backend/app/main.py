@@ -1,4 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse
+from pathlib import Path
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
@@ -7,6 +9,13 @@ from .database import Base, engine, get_db
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Soil Sampling Backend")
+FRONTEND_DIR = Path(__file__).resolve().parent / "frontend"
+INDEX_HTML = FRONTEND_DIR / "index.html"
+
+
+@app.get("/", response_class=FileResponse)
+def read_root() -> FileResponse:
+    return FileResponse(INDEX_HTML)
 
 
 @app.get("/health")

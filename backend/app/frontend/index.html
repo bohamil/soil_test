@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Soil Grid — Sampling Command</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Inter", "SF Pro Display", "Helvetica Neue", sans-serif;
+        background: #0c0f14;
+        --steel: #161b22;
+        --fog: #9aa4b2;
+        --ice: #e9edf2;
+        --accent: #d7dde5;
+        --edge: rgba(255, 255, 255, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top, #1a2230 0%, #0c0f14 48%, #0a0d12 100%);
+        color: var(--ice);
+        letter-spacing: 0.01em;
+      }
+
+      main {
+        width: min(1120px, 92vw);
+        padding: 64px 56px;
+        background: rgba(12, 15, 20, 0.7);
+        border: 1px solid var(--edge);
+        border-radius: 28px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 48px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        color: var(--fog);
+      }
+
+      .mark {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .mark span {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #e1e6ee 0%, #657388 100%);
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 48px;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: clamp(2.6rem, 6vw, 4.6rem);
+        line-height: 1.05;
+        font-weight: 500;
+        color: var(--ice);
+      }
+
+      p {
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--fog);
+        margin-top: 20px;
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .pill {
+        padding: 16px 22px;
+        border-radius: 999px;
+        border: 1px solid var(--edge);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+        color: var(--accent);
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+      }
+
+      .cta {
+        display: flex;
+        gap: 16px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: #f0f3f8;
+        color: #0c0f14;
+        padding: 14px 28px;
+        border-radius: 999px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: transparent;
+        color: var(--ice);
+        border: 1px solid var(--edge);
+      }
+
+      .metrics {
+        margin-top: 56px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 24px;
+      }
+
+      .metric {
+        padding: 20px;
+        border-radius: 20px;
+        border: 1px solid var(--edge);
+        background: rgba(22, 27, 34, 0.5);
+      }
+
+      .metric h2 {
+        font-size: 28px;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+
+      .metric span {
+        color: var(--fog);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+      }
+
+      footer {
+        margin-top: 48px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--fog);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+      }
+
+      @media (max-width: 720px) {
+        main {
+          padding: 48px 32px;
+        }
+
+        header,
+        footer {
+          flex-direction: column;
+          gap: 12px;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="mark"><span></span> Soil Grid</div>
+        <div>Sampling Command</div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <h1>Precision sampling, distilled.</h1>
+          <p>
+            A minimalist command center for field boundaries, sampling grids, and
+            lab-ready exports. Calm, fast, and engineered for exact work.
+          </p>
+        </div>
+        <div class="controls">
+          <div class="pill">2.5 Acre Default Grid</div>
+          <div class="pill">Snake-Order Numbering</div>
+          <div class="pill">KML & CSV Merge Ready</div>
+          <div class="cta">
+            <button>Start New Plan</button>
+            <button class="secondary">Import Boundaries</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="metrics">
+        <div class="metric">
+          <h2>02:30</h2>
+          <span>Grid Creation Time</span>
+        </div>
+        <div class="metric">
+          <h2>10 m</h2>
+          <span>Match Tolerance</span>
+        </div>
+        <div class="metric">
+          <h2>∞</h2>
+          <span>Plans Per Field</span>
+        </div>
+      </section>
+
+      <footer>
+        <span>Soil Sampling OS</span>
+        <span>Ultra Minimal · 2026</span>
+      </footer>
+    </main>
+  </body>
+</html>
