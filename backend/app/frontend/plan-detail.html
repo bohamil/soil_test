@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Soil Grid — Field Detail</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Inter", "SF Pro Display", "Helvetica Neue", sans-serif;
+        background: #0c0f14;
+        --steel: #161b22;
+        --fog: #9aa4b2;
+        --ice: #e9edf2;
+        --accent: #d7dde5;
+        --edge: rgba(255, 255, 255, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top, #1a2230 0%, #0c0f14 48%, #0a0d12 100%);
+        color: var(--ice);
+        letter-spacing: 0.01em;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      main {
+        width: min(1180px, 94vw);
+        padding: 56px;
+        background: rgba(12, 15, 20, 0.7);
+        border: 1px solid var(--edge);
+        border-radius: 28px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        color: var(--fog);
+        gap: 24px;
+      }
+
+      nav {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      nav a {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        transition: 0.2s ease;
+      }
+
+      nav a:hover,
+      nav a.active {
+        border-color: var(--edge);
+        color: var(--ice);
+      }
+
+      .mark {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .mark span {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #e1e6ee 0%, #657388 100%);
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+      }
+
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.2rem, 4vw, 3.8rem);
+        font-weight: 500;
+      }
+
+      .hero p {
+        color: var(--fog);
+        margin-top: 12px;
+        line-height: 1.6;
+        max-width: 520px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      button {
+        background: #f0f3f8;
+        color: #0c0f14;
+        padding: 12px 18px;
+        border-radius: 999px;
+        border: none;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: transparent;
+        color: var(--ice);
+        border: 1px solid var(--edge);
+      }
+
+      .grid {
+        margin-top: 36px;
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        gap: 26px;
+      }
+
+      .panel {
+        padding: 24px;
+        border-radius: 22px;
+        border: 1px solid var(--edge);
+        background: rgba(22, 27, 34, 0.6);
+      }
+
+      .map {
+        height: 280px;
+        border-radius: 20px;
+        border: 1px dashed rgba(233, 237, 242, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--fog);
+        font-size: 14px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+      }
+
+      .sample-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .sample {
+        padding: 12px 16px;
+        border-radius: 16px;
+        border: 1px solid var(--edge);
+        background: rgba(12, 16, 22, 0.7);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+      }
+
+      .sample span {
+        color: var(--fog);
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 16px;
+      }
+
+      .event {
+        padding: 16px;
+        border-radius: 16px;
+        border: 1px solid var(--edge);
+        background: rgba(9, 13, 18, 0.7);
+      }
+
+      .event h4 {
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+
+      .event p {
+        color: var(--fog);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      footer {
+        margin-top: 34px;
+        color: var(--fog);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        main {
+          padding: 40px 28px;
+        }
+
+        header {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        nav {
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="mark"><span></span> Soil Grid</div>
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="plans.html">Plans</a>
+          <a class="active" href="plan-detail.html">Field Detail</a>
+          <a href="exports.html">Exports</a>
+          <a href="settings.html">Settings</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div>
+          <h1>Fulton North · Plan 18B</h1>
+          <p>
+            Field boundary captured 3 days ago. Sampling grid prepared for 42 points with
+            moisture tracking and auto-tagged samples.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button>Dispatch Crew</button>
+          <button class="secondary">Download Grid</button>
+          <button class="secondary">Update Lab Kit</button>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <div class="map">Map viewport</div>
+          <div class="sample-list">
+            <div class="sample">
+              <div>Point A-12 · 42.2889, -89.0084</div>
+              <span>Ready</span>
+            </div>
+            <div class="sample">
+              <div>Point B-04 · 42.2873, -89.0112</div>
+              <span>In Field</span>
+            </div>
+            <div class="sample">
+              <div>Point C-07 · 42.2844, -89.0091</div>
+              <span>Queued</span>
+            </div>
+            <div class="sample">
+              <div>Point D-03 · 42.2820, -89.0130</div>
+              <span>Queued</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <div class="timeline">
+            <div class="event">
+              <h4>Moisture window</h4>
+              <p>Optimal sampling window opens in 6 hours. Forecast holds steady at 18%.</p>
+            </div>
+            <div class="event">
+              <h4>Lab kit check</h4>
+              <p>Kit 14B assigned. 12 spare bags staged. Labels synced to handheld.</p>
+            </div>
+            <div class="event">
+              <h4>Export readiness</h4>
+              <p>CSV, KML, and PDF map ready for dispatch once crew is assigned.</p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <footer>
+        <span>Status: Grid Locked</span>
+        <span>Next update in 12 minutes</span>
+      </footer>
+    </main>
+  </body>
+</html>
