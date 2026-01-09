@@ -277,7 +277,9 @@ Return a structured report object:
 ## Grid generation approach (implementation notes)
 - Grid cell area = grid_size_acres × 4046.8564224 m².
 - Convert to cell width/height for square grid: cell_size_m = sqrt(area_m2).
-- Project boundary to a meter-based CRS for grid math (local UTM).
+- On import, detect source CRS from the uploaded `.prj` file and reproject boundaries into a meter-based CRS (e.g., local UTM) before any grid math.
+  - If `.prj` is missing or cannot be parsed, CRS detection fails.
+  - CRS detection failures surface as a user-visible error on import, and the field is blocked from grid generation until a valid CRS is provided.
 - Generate grid over bounding box, clip to boundary, compute centroids.
 - Only keep points inside boundary (or threshold option later).
 - Save plan parameters for reproducibility (grid size, offset, etc.).
