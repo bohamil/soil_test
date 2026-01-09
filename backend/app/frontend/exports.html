@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Soil Grid — Exports</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Inter", "SF Pro Display", "Helvetica Neue", sans-serif;
+        background: #0c0f14;
+        --steel: #161b22;
+        --fog: #9aa4b2;
+        --ice: #e9edf2;
+        --accent: #d7dde5;
+        --edge: rgba(255, 255, 255, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top, #1a2230 0%, #0c0f14 48%, #0a0d12 100%);
+        color: var(--ice);
+        letter-spacing: 0.01em;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      main {
+        width: min(1140px, 92vw);
+        padding: 56px;
+        background: rgba(12, 15, 20, 0.7);
+        border: 1px solid var(--edge);
+        border-radius: 28px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        color: var(--fog);
+        gap: 24px;
+      }
+
+      nav {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      nav a {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        transition: 0.2s ease;
+      }
+
+      nav a:hover,
+      nav a.active {
+        border-color: var(--edge);
+        color: var(--ice);
+      }
+
+      .mark {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .mark span {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #e1e6ee 0%, #657388 100%);
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+      }
+
+      h1 {
+        font-size: clamp(2.1rem, 4vw, 3.4rem);
+        font-weight: 500;
+      }
+
+      .subtitle {
+        color: var(--fog);
+        margin-top: 12px;
+        max-width: 520px;
+        line-height: 1.6;
+      }
+
+      .grid {
+        margin-top: 36px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        gap: 26px;
+      }
+
+      .panel {
+        padding: 24px;
+        border-radius: 22px;
+        border: 1px solid var(--edge);
+        background: rgba(22, 27, 34, 0.6);
+      }
+
+      .queue {
+        display: grid;
+        gap: 14px;
+      }
+
+      .queue-item {
+        padding: 16px;
+        border-radius: 16px;
+        border: 1px solid var(--edge);
+        background: rgba(9, 13, 18, 0.7);
+        display: grid;
+        gap: 10px;
+      }
+
+      .queue-item span {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--fog);
+      }
+
+      .queue-item strong {
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      .export-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .format-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .format {
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid var(--edge);
+        background: rgba(12, 16, 22, 0.7);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+      }
+
+      .format span {
+        color: var(--fog);
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+      }
+
+      button {
+        background: #f0f3f8;
+        color: #0c0f14;
+        padding: 12px 18px;
+        border-radius: 999px;
+        border: none;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: transparent;
+        color: var(--ice);
+        border: 1px solid var(--edge);
+      }
+
+      footer {
+        margin-top: 34px;
+        color: var(--fog);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      @media (max-width: 920px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        main {
+          padding: 40px 28px;
+        }
+
+        header {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        nav {
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="mark"><span></span> Soil Grid</div>
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="plans.html">Plans</a>
+          <a href="plan-detail.html">Field Detail</a>
+          <a class="active" href="exports.html">Exports</a>
+          <a href="settings.html">Settings</a>
+        </nav>
+      </header>
+
+      <section>
+        <h1>Export center.</h1>
+        <p class="subtitle">
+          Package grids, labels, and reports for labs or clients. One-click output for KML, CSV, and PDF summaries.
+        </p>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <div class="queue">
+            <div class="queue-item">
+              <span>Queued</span>
+              <strong>Fulton North · Plan 18B</strong>
+              <div class="export-actions">
+                <button>Generate Bundle</button>
+                <button class="secondary">Preview</button>
+              </div>
+            </div>
+            <div class="queue-item">
+              <span>Processing</span>
+              <strong>Metro South · Cover Crop Trial</strong>
+              <div class="export-actions">
+                <button class="secondary">View Progress</button>
+                <button class="secondary">Notify Team</button>
+              </div>
+            </div>
+            <div class="queue-item">
+              <span>Delivered</span>
+              <strong>Fulton East · Irrigated Corn</strong>
+              <div class="export-actions">
+                <button class="secondary">Download Logs</button>
+                <button class="secondary">Resend Link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h3>Formats enabled</h3>
+          <div class="format-grid">
+            <div class="format">
+              <div>Grid Coordinates</div>
+              <span>CSV</span>
+            </div>
+            <div class="format">
+              <div>Boundary Polygons</div>
+              <span>KML</span>
+            </div>
+            <div class="format">
+              <div>Lab Submission</div>
+              <span>PDF</span>
+            </div>
+            <div class="format">
+              <div>Client Summary</div>
+              <span>XLSX</span>
+            </div>
+          </div>
+          <div class="export-actions" style="margin-top: 18px;">
+            <button>New Export</button>
+            <button class="secondary">Manage Templates</button>
+          </div>
+        </aside>
+      </section>
+
+      <footer>
+        <span>Exports synced hourly</span>
+        <span>All links expire in 14 days</span>
+      </footer>
+    </main>
+  </body>
+</html>

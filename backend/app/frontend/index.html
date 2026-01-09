@@ -32,6 +32,11 @@
         letter-spacing: 0.01em;
       }
 
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
       main {
         width: min(1120px, 92vw);
         padding: 64px 56px;
@@ -51,6 +56,26 @@
         text-transform: uppercase;
         letter-spacing: 0.3em;
         color: var(--fog);
+        gap: 24px;
+      }
+
+      nav {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      nav a {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        transition: 0.2s ease;
+      }
+
+      nav a:hover {
+        border-color: var(--edge);
+        color: var(--ice);
       }
 
       .mark {
@@ -181,6 +206,10 @@
           gap: 12px;
           text-align: center;
         }
+
+        nav {
+          justify-content: center;
+        }
       }
     </style>
   </head>
@@ -188,7 +217,13 @@
     <main>
       <header>
         <div class="mark"><span></span> Soil Grid</div>
-        <div>Sampling Command</div>
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="plans.html">Plans</a>
+          <a href="plan-detail.html">Field Detail</a>
+          <a href="exports.html">Exports</a>
+          <a href="settings.html">Settings</a>
+        </nav>
       </header>
 
       <section class="hero">
@@ -202,7 +237,7 @@
         <div class="controls">
           <div class="pill">2.5 Acre Default Grid</div>
           <div class="pill">Snake-Order Numbering</div>
-          <div class="pill">KML & CSV Merge Ready</div>
+          <div class="pill">KML &amp; CSV Merge Ready</div>
           <div class="cta">
             <button>Start New Plan</button>
             <button class="secondary">Import Boundaries</button>
