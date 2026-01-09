@@ -1,1 +1,294 @@
+# Soil Sampling Grid Builder Web App (Farmers + Advisors)
 
+## Summary
+Build a web app that lets farmers and crop advisors organize field boundaries into groups, generate soil sampling point grids (default 2.5-acre), adjust grid placement on a map, auto-number sample points in a sane walking/driving order, export KML for phone navigation, and later merge lab results (CSV) back onto the sampling points.
+
+This product is about speed + organization + correctness: getting from “here are my fields” to “here are my points to sample” in minutes, and keeping everything tied together when lab results arrive.
+
+## Target users
+**Primary**
+- Farmers who soil sample themselves or coordinate sampling.
+- Advisors / Agronomists managing many clients and fields.
+
+**Secondary**
+- Soil sampling technicians / interns.
+
+## Core jobs-to-be-done
+- Import boundaries quickly (shapefile) and reliably.
+- Name fields correctly without manual typing.
+- Organize fields into groups (farm / client / year / crop / anything).
+- Generate consistent soil sampling point grids, tweak placement on a map, and create points.
+- Number points in a sampling-friendly order.
+- Export KML (and optionally email it to yourself).
+- When lab results come back, merge CSV to points and keep it attached to the field + grid version.
+
+## Goals and non-goals
+**Goals**
+- Shapefile import that “just works” for typical boundary exports.
+- Flexible field naming options: boundary filename root OR chosen attribute column.
+- Grouping system that scales (nested groups optional later).
+- Grid generation with a clear default (2.5 acres) and easy adjustment.
+- Intuitive “move the grid around” interaction on a map.
+- Robust point numbering approach (row-by-row “snake” pattern or nearest-neighbor route).
+- Exports that work on phones (KML).
+- CSV merge that doesn’t destroy data and can be repeated if the lab file changes.
+
+**Non-goals (Phase 1)**
+- Automated variable-rate recommendations.
+- Full lab ordering / logistics platform.
+- Complex offline-first mobile app (start with mobile-friendly web + KML export).
+
+## Key workflows
+### 5.1 Onboarding / account creation
+- User creates account (email/password).
+- Advisors can optionally create “clients” later (Phase 2).
+- Email verification recommended (prevents junk accounts; needed for emailing KML).
+
+### 5.2 Import field boundaries
+**Inputs**
+- Shapefile upload (expects .shp + .dbf + .shx + .prj + optional .cpg), typically as a ZIP.
+- Optional support for GeoJSON/GPKG later.
+
+**Naming**
+User chooses:
+- Use root filename as field name (e.g., Lot_10_E.shp → Lot_10_E)
+- Use a column from attribute table (dropdown list of columns)
+
+**Grouping**
+User can:
+- Select an existing group from dropdown (e.g., “Allen Farms”, “2026 Soil Sampling”, “Corn Fields”)
+- OR type a new group name and create it on import.
+
+**Result**
+- Fields appear in a left sidebar list and on the map.
+
+### 5.3 Organize fields
+User can:
+- Move fields between groups (drag & drop or action menu)
+- Delete fields
+- Duplicate groups (creates a new group with the same fields, but “grid plans” are separate copies)
+- Rename groups
+
+Important rule: duplicating a group should not overwrite existing sampling grids; it creates new “plans”.
+
+### 5.4 Create soil sampling grid/points (within a field)
+Inside a field:
+- User selects grid size in acres (default 2.5)
+- User chooses grid style:
+  - Square grid (Phase 1)
+  - Optional later: hex grid, stratified zones, boundary buffer, etc.
+
+**Map interactions**
+- Show field polygon.
+- Show a grid preview layer clipped to the field.
+- User can drag the grid (offset in X/Y) to align it with how they want to sample.
+- Optional: rotate grid (Phase 2; rotation can be a power feature).
+
+**Action**
+- Click “Create Grid Points” button.
+
+**System generates point features**
+- One point per grid cell (centroid), only if centroid falls inside boundary (or alternative logic: intersect area threshold).
+- Auto-number points:
+  - Default numbering: “snake” order across rows (minimizes backtracking).
+  - Option: “nearest neighbor from entry point” if user clicks a “start point”.
+
+**Output**
+- Point layer saved as a “Sampling Plan” version attached to the field.
+
+### 5.5 Export KML / Email KML
+From a field’s sampling plan:
+- Export KML with:
+  - Field boundary polygon
+  - Sampling points with:
+    - Point ID (Sample #)
+    - Field name
+    - Group name
+    - Notes placeholder
+
+User can:
+- Download KML
+- Click “Email me this KML”
+
+Sends KML as attachment or link and includes basic instructions for opening on phone (Google Earth / other KML apps).
+
+### 5.6 Merge lab results (CSV → points)
+When lab results arrive:
+- User uploads CSV.
+- User maps CSV columns:
+  - Required: Sample ID (must match point numbering) OR lat/long OR unique label
+  - Optional: pH, OM, P, K, CEC, etc.
+
+**Merge rules**
+- Match by Sample ID is preferred.
+- If match fails, show errors and unmatched rows.
+- Results become attributes on the point layer and are tied to that sampling plan version.
+
+## Product surfaces (screens)
+- **Dashboard**
+  - Recent groups, fields, sampling plans
+  - Import button
+- **Fields + Groups (main workspace)**
+  - Left sidebar: groups → fields list
+  - Main map: boundaries, optional points
+  - Top actions: Import, Create group, Search
+- **Field detail**
+  - Field metadata (name, acres, group membership)
+  - Sampling plans list (versions)
+  - Button: “Create new sampling plan”
+- **Sampling plan builder**
+  - Grid size input (default 2.5 acres)
+  - Map with grid preview + drag offset controls
+  - Create points button
+  - Numbering options
+  - Export KML + Email KML buttons
+- **CSV merge**
+  - Upload CSV
+  - Column mapping UI
+  - Preview joined results
+  - Save
+
+## Data model (high-level)
+- **User**
+  - id, email, hashed_password, verified, created_at
+- **Group**
+  - id, user_id, name, created_at
+- **Field**
+  - id, user_id
+  - group_id (nullable if ungrouped)
+  - field_name
+  - geometry (polygon/multipolygon)
+  - source_file_name
+  - attributes_json (optional; store original shapefile attributes)
+  - created_at
+- **SamplingPlan**
+  - id, field_id, name (e.g., “2.5ac grid Jan 2026”)
+  - grid_size_acres
+  - grid_offset_x, grid_offset_y (and rotation if added)
+  - numbering_method
+  - created_at
+- **SamplingPoint**
+  - id, sampling_plan_id
+  - point_index (1..N)
+  - geometry (point)
+  - properties_json (lab results + notes)
+- **LabUpload**
+  - id, sampling_plan_id
+  - original_filename
+  - mapping_json
+  - created_at
+
+## Backend + storage recommendation (geo-capable)
+**Best default: PostgreSQL + PostGIS**
+- Stores polygons/points as native geometry types.
+- Fast spatial queries (clipping, intersects, centroids).
+- Mature ecosystem + backups + scalability.
+- Works great for your use case (boundaries, grids, points, joins).
+
+**Store/export formats**
+- Internally: PostGIS geometries.
+- Export: KML (and GeoJSON if wanted).
+- Optional: allow “download GPKG” later as a convenience export.
+
+**Alternate (okay for MVP, not ideal long-term): SQLite + SpatiaLite**
+- Works, simpler deployment, but more fragile under concurrency and scaling.
+- Fine if you expect low traffic and mostly single-user usage.
+
+**File storage**
+- Store uploaded ZIP shapefile in object storage (S3-compatible).
+- Keep processed geometry in PostGIS.
+
+## Grid generation approach (implementation notes)
+- Grid cell area = grid_size_acres × 4046.8564224 m².
+- Convert to cell width/height for square grid: cell_size_m = sqrt(area_m2).
+- Project boundary to a meter-based CRS for grid math (local UTM).
+- Generate grid over bounding box, clip to boundary, compute centroids.
+- Only keep points inside boundary (or threshold option later).
+- Save plan parameters for reproducibility (grid size, offset, etc.).
+
+## Numbering logic (what “intuitive” means)
+Default should work for most people without thinking:
+- Sort points by row (north→south or south→north), then within row:
+  - Alternate direction each row (“snake” pattern).
+
+Optional later:
+- User clicks an “entry point” on the field edge, then number by nearest neighbor from start.
+
+## Emailing KML
+To email KML you need:
+- Verified email.
+- A transactional email provider (SendGrid, Postmark, SES).
+- Either:
+  - Attach KML (watch size limits), or
+  - Provide a signed download link that expires.
+
+For safety and reliability, do signed link by default.
+
+## Permissions and sharing (Phase 2)
+**Phase 1**: everything private to user.
+
+**Phase 2**:
+- Advisor accounts with multiple clients.
+- Share group/field with another user (view/edit roles).
+
+## MVP scope (Phase 1)
+- Auth + users.
+- Groups CRUD + fields CRUD.
+- Shapefile ZIP import + naming options + grouping on import.
+- Map workspace (view boundaries).
+- Sampling plan builder:
+  - Grid size default 2.5.
+  - Grid preview + drag offset.
+  - Create points.
+  - Snake numbering.
+- Export KML.
+- Email KML (basic).
+- CSV merge by sample ID + mapping UI.
+
+## Acceptance criteria (tight and testable)
+**Import**
+- Upload ZIP with shapefile parts → boundary renders on map.
+- User can choose filename root OR attribute column for field name.
+- Field saved and visible after refresh.
+
+**Groups**
+- Create/rename/delete groups.
+- Move field to another group.
+- Duplicate group creates a new group and does not overwrite existing sampling plans.
+
+**Grid**
+- Default grid size = 2.5 acres.
+- User can change grid size (e.g., 1, 2.5, 5).
+- User can drag grid offset and see preview update.
+- “Create grid points” produces points inside boundary and saves plan.
+
+**Numbering**
+- Points are numbered consistently and predictably (snake order).
+- Exported KML shows numbers and field name.
+
+**KML**
+- Downloaded KML opens in common phone apps and shows points.
+- Email KML sends a link or attachment successfully.
+
+**CSV Merge**
+- Upload CSV, map “Sample ID” column.
+- Merge attaches lab attributes to points.
+- Unmatched IDs are reported.
+
+## Tech stack suggestion (pragmatic)
+- Frontend: React + map library (Mapbox GL JS or Leaflet).
+- Backend: Python (FastAPI) or Node.
+- Spatial DB: PostgreSQL + PostGIS.
+- File storage: S3-compatible (AWS S3, Cloudflare R2, etc.).
+- Email: Postmark/SendGrid/SES.
+- Geometry processing: PostGIS + server-side tooling (Shapely/GeoPandas) as needed for import validation.
+
+## Future enhancements (Phase 2+)
+- Grid rotation.
+- Buffer from field edges.
+- Zone-based sampling patterns.
+- Multi-field batch plan generation.
+- Mobile-friendly “navigate to next point” mode.
+- GPKG export.
+- Team sharing + advisor/client hierarchies.
+- Basic reporting outputs (PDF: point list, maps, etc.).
