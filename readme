@@ -70,6 +70,7 @@ User can:
 - Rename groups
 
 Important rule: duplicating a group should not overwrite existing sampling grids; it creates new “plans”.
+When duplicating, sampling plans are always copied with new IDs, and existing points remain immutable (new plans get their own point rows).
 
 ### 5.4 Create soil sampling grid/points (within a field)
 Inside a field:
@@ -167,11 +168,16 @@ When lab results arrive:
   - grid_offset_x, grid_offset_y (and rotation if added)
   - numbering_method
   - created_at
+  - **Uniqueness/identity rules**
+    - Each plan should have a stable, unique identifier per field (e.g., a version number or a unique plan name scoped to the field).
+    - Creating a new plan for the same field always generates a new plan ID and does not overwrite prior plan settings or points.
 - **SamplingPoint**
   - id, sampling_plan_id
   - point_index (1..N)
   - geometry (point)
   - properties_json (lab results + notes)
+  - **Uniqueness/identity rules**
+    - Points are uniquely identified by `(sampling_plan_id, point_index)`.
 - **LabUpload**
   - id, sampling_plan_id
   - original_filename
@@ -184,6 +190,10 @@ When lab results arrive:
 - Fast spatial queries (clipping, intersects, centroids).
 - Mature ecosystem + backups + scalability.
 - Works great for your use case (boundaries, grids, points, joins).
+  - Suggested constraints/guards if implementing a schema:
+    - Unique index on `sampling_plans(field_id, name)` or `sampling_plans(field_id, version)` to enforce stable plan identity per field.
+    - Unique index on `sampling_points(sampling_plan_id, point_index)` to enforce point identity.
+    - Insert-only guard when creating a new plan for an existing field (e.g., disallow `UPSERT` on `sampling_plans` by `field_id` alone; always create a new `sampling_plans` row and new `sampling_points` rows).
 
 **Store/export formats**
 - Internally: PostGIS geometries.
