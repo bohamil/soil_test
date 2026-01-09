@@ -124,6 +124,72 @@ When lab results arrive:
 - If match fails, show errors and unmatched rows.
 - Results become attributes on the point layer and are tied to that sampling plan version.
 
+**Exact matching behavior**
+- **Required column formats (after mapping):**
+  - **Sample ID**: string or integer. Trim whitespace; preserve leading zeros by treating as string. Allowed chars: letters, numbers, space, dash, underscore. Empty values are invalid.
+  - **Latitude/Longitude** (if using location matching): decimal degrees in WGS84 (EPSG:4326). Acceptable ranges: latitude −90..90, longitude −180..180. Optional hemisphere suffix (N/S/E/W) is allowed and normalized. Empty values are invalid.
+- **Matching modes (exclusive, user chooses in UI):**
+  - **Sample ID mode (default):** exact, case-insensitive match after trimming whitespace. No fuzzy matching.
+  - **Lat/Long mode:** match CSV row to the single nearest sampling point within a **10 meter** radius. Distance computed in meters after projecting to a meter-based CRS. If no point is within 10 m, the row is unmatched.
+- **Duplicate Sample IDs:**
+  - **CSV duplicates:** reject the upload. The user must fix the file; no partial merge.
+  - **Sampling plan duplicates:** block merge and surface configuration error; sampling points must have unique Sample IDs within the plan.
+
+**Validation steps (run before merge)**
+1. Verify required mapped columns are present in the CSV header; if missing, reject with errors.
+2. For each row, validate required fields (Sample ID or lat/long) and range/format rules. Collect row-level errors.
+3. Detect duplicate Sample IDs in the CSV (after trimming + case fold). If found, reject.
+4. Verify sampling plan Sample IDs are unique; if not, reject and flag as plan data issue.
+5. If using lat/long mode, validate lat/long numeric parsing and ranges; reject rows with invalid coordinates.
+
+**Error report format**
+Return a structured report object:
+```json
+{
+  "status": "error" | "warning",
+  "summary": {
+    "total_rows": 120,
+    "valid_rows": 110,
+    "matched_rows": 105,
+    "unmatched_rows": 5,
+    "error_rows": 10
+  },
+  "errors": [
+    {
+      "row_number": 14,
+      "code": "MISSING_REQUIRED",
+      "message": "Missing Sample ID.",
+      "columns": ["sample_id"]
+    },
+    {
+      "row_number": 27,
+      "code": "DUPLICATE_SAMPLE_ID",
+      "message": "Duplicate Sample ID 'A-12' in CSV.",
+      "columns": ["sample_id"]
+    }
+  ],
+  "unmatched": [
+    {
+      "row_number": 52,
+      "reason": "NO_POINT_WITHIN_TOLERANCE",
+      "details": "Nearest point is 18.4 m away; tolerance is 10 m."
+    }
+  ],
+  "ambiguous": [
+    {
+      "row_number": 88,
+      "reason": "MULTIPLE_POINTS_WITHIN_TOLERANCE",
+      "details": "3 points within 10 m; closest two are 1.2 m apart."
+    }
+  ]
+}
+```
+
+**User-facing messaging guidance**
+- **Unmatched rows:** tell the user how many rows did not match and provide the reason. Example: “5 rows couldn’t be matched. The closest point for row 52 is 18.4 m away (tolerance 10 m).”
+- **Ambiguous matches (lat/long mode):** require user action. Example: “Row 88 has 3 points within 10 m. Please select the correct point or fix the coordinates.”
+- **Duplicate IDs:** block the merge and instruct to fix the CSV. Example: “Duplicate Sample IDs found (A-12). Fix duplicates and re-upload.”
+
 ## Product surfaces (screens)
 - **Dashboard**
   - Recent groups, fields, sampling plans
